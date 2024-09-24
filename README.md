@@ -1,14 +1,32 @@
 # Team Gremlin
 
-Team Gremlin repo, COS 420 2024-25
-
+Team Gremlin repo, COS 420 F2024
 
 # Team Roles
 
-Eric: Project Manager
+Eric Jestel: Project Manager
 
-Siddhartha: Developer
+Siddhartha Bajracharya: Developer
 
-Josh: Developer
+Josh Wilbur: Developer
 
-Saurav: Designer
+Saurav Pokhrel: Designer
+
+# Problem Statements
+
+**Problem Statement**: The course planning interface can prevent students from effectively planning schedules, requiring that extensive time be spent or subpar courses taken.
+
+**Example**: The team members have spent extensive time planning their schedules to avoid this issue and occasionally advisors must step in to revise the schedules. A friend of a team member didn’t take a course because of scheduling difficulties, then was forced to take summer courses or do an extremely high courseload semester later.
+
+**Prior Solution + Issues**: Coursicle is helpful since it allows you to schedule classes, but doesn’t allow for personal time scheduling. Additionally, it doesn’t solve scheduling conflicts and it doesn’t report on degree progress or future semesters.
+
+**Question**: How do we design a web app to simplify the course selection process?
+
+
+**Problem Statement**: Financial planning requires higher level math than many adults will understand, so many turn to online tools or don’t plan. Financial literacy isn’t emphasized in our school systems.
+
+**Example**: 46% of American households have credit card debt, an indicator of poor financial decisions. Additionally, budgeting and saving are neglected in many households.
+
+**Prior Solution** + Issues: Many existing tools are available, but people don’t use them and they can be hard to find. Furthermore, a lot of financial sites are filled with ads or have a paywall.
+
+**Question**: How can we design a tool that people can use as a one stop shop for financial planning?**
