@@ -1,8 +1,6 @@
-# TeamG
+# Team Gremlin
 
-Team G repo, COS 420 2024-25
-
-
+Team Gremlin repo, COS 420 2024-25
 
 
 # Team Roles
