@@ -12,6 +12,10 @@ Josh Wilbur: Developer
 
 Saurav Pokhrel: Designer
 
+
+# Mission Statement
+Make the world better, one program at a time!
+
 # Problem Statements
 
 ****(1): Problem Statement**: The course planning interface can prevent students from effectively planning schedules, requiring that extensive time be spent or subpar courses taken.**
