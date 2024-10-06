@@ -2,14 +2,15 @@
 
 # dependencies
 /node_modules
-/.pnp
+/react-lab/node_modules
+/react-lab/.pnp
 .pnp.js
 
 # testing
-/coverage
+/react-lab/coverage
 
 # production
-/build
+/react-lab/build
 
 # misc
 .DS_Store
