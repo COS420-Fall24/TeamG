@@ -41,4 +41,8 @@ Make the world better, one program at a time!
 
 
 ---
-**Installation**: In VSC, git pull https://github.com/COS420-Fall24/TeamG into a new folder. *cd* into TeamG, then *npm install*. Finally, *npm run start* to see the webpage.
+**Installation**: 
+* In Virtual Studio Code, run the command: `git pull https://github.com/COS420-Fall24/TeamG`
+* `cd` into TeamG
+* Run: `npm install`
+* To see the webpage, run: `npm run start`
