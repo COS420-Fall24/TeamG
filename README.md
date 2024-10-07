@@ -37,3 +37,8 @@ Make the world better, one program at a time!
 **Prior Solution** + Issues: Many existing tools are available, but people don’t use them and they can be hard to find. Furthermore, a lot of financial sites are filled with ads or have a paywall.
 
 **Question**: How can we design a tool that people can use as a one stop shop for financial planning?**
+
+
+
+---
+**Installation**: In VSC, git pull https://github.com/COS420-Fall24/TeamG into a new folder. *cd* into TeamG, then *npm install*. Finally, *npm run start* to see the webpage.
