@@ -18,7 +18,7 @@ jobs:
           node-version: '22.x' # Preferably use 22.9.x
       - run: npm ci
 
-      - name: run build
+      - name: Create a build
         run: npm run build
       # TODO: Uncomment this part when we write tests
       #- run: npm test

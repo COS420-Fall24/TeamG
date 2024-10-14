@@ -9,11 +9,12 @@ function App() {
   return (
     <Routes>
       {/* Login route */}
-      <Route path="/" element={<Login authorized_true={authorized_true} />} />
+      <Route path="/" 
+       element={<Login authorized_true={authorized_true} />} />
       
-      {/* Dashboard route*/}
+      {/* Homepage route*/}
       <Route 
-        path="/dashboard" 
+        path="/homepage" 
         element={is_authenticated ? <Homepage /> : <Navigate to="/" />} 
       />
     </Routes>
