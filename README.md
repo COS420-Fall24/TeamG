@@ -12,8 +12,8 @@ Josh Wilbur: Developer
 
 Saurav Pokhrel: Designer
 
-
 # Mission Statement
+
 Make the world better, one program at a time!
 
 # Problem Statements
@@ -28,8 +28,6 @@ Make the world better, one program at a time!
 
 ---
 
-
-
 **(2): Problem Statement**: Financial planning requires higher level math than many adults will understand, so many turn to online tools or don’t plan. Financial literacy isn’t emphasized in our school systems.
 
 **Example**: 46% of American households have credit card debt, an indicator of poor financial decisions. Additionally, budgeting and saving are neglected in many households.
@@ -38,11 +36,12 @@ Make the world better, one program at a time!
 
 **Question**: How can we design a tool that people can use as a one stop shop for financial planning?**
 
-
-
 ---
-**Installation**: 
+
+**Installation**:
+
 * In Virtual Studio Code, run the command: `git pull https://github.com/COS420-Fall24/TeamG`
 * `cd` into TeamG
 * Run: `npm install`
 * To see the webpage, run: `npm run start`
+* In website: enter admin/admin for credentials
