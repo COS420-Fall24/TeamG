@@ -1,5 +1,5 @@
 {
-  "name": "teamg",
+  "name": "money_gremlin",
   "version": "1.0.0",
   "description": "Team Gremlin repo, COS 420 F2024",
   "main": "index.js",
@@ -847,8 +847,17 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
+  "browserslist": [
+  ">0.2%",
+  "not dead",
+  "not op_mini all",
+  "defaults"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/COS420-Fall24/TeamG.git"
@@ -858,5 +867,5 @@
   "bugs": {
     "url": "https://github.com/COS420-Fall24/TeamG/issues"
   },
-  "homepage": "https://github.com/COS420-Fall24/TeamG#readme"
+  "homepage": "."
 }
