@@ -1,24 +1,15 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Login from './login';
 
 function App() {
+  const [authorized_true] = useState(false);  // State to track if user is logged in
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Money Gremlin.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routes>
+      {/* Login route */}
+      <Route path="/" element={<Login authorized_true={authorized_true} />} />
+    </Routes>
   );
 }
 
