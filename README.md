@@ -43,5 +43,6 @@ Make the world better, one program at a time!
 * In Virtual Studio Code, run the command: `git pull https://github.com/COS420-Fall24/TeamG`
 * `cd` into TeamG
 * Run: `npm install`
+* Run: `npm install @react-oauth/google react-router-dom@6` (required for sign in with google)
 * To see the webpage, run: `npm run start`
 * In website: enter admin/admin for credentials
