@@ -66,3 +66,26 @@
 .login-button:hover {
     background-color: #45a049;
 }
+
+/* Styling for the "Don't have an account?" text and button */
+.signup-text {
+    margin-top: 15px;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+/* Styling for the inline button link */
+.signup-button {
+    background: none;
+    border: none;
+    color: #4CAF50;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 14px;
+    padding: 0;
+    margin-left: 5px;
+}
+
+.signup-button:hover {
+    color: #45a049;
+}
