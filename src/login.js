@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google'; // Correct import
-import './login.css'; 
+import './login.css';
+import { auth } from "./firebase-config";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { db } from "./firebase-config"; // Import Firestore instance
+import { doc, setDoc } from "firebase/firestore"; // Firestore functions
 
 const Login = ({ authorized_true }) => {
   const [username, setUsername] = useState('');
@@ -19,10 +22,25 @@ const Login = ({ authorized_true }) => {
   };
 
   // Handle successful Google login
-  const handleGoogleSuccess = (credentialResponse) => {
-    console.log('Google login successful:', credentialResponse);
-    authorized_true(true);
-    navigate('/homepage'); // Navigate to homepage on success
+  const handleGoogleSuccess = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      // Store user info in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        name: user.displayName,
+        createdAt: new Date(),
+      });
+
+      console.log('Google login successful:', user);
+      authorized_true(true);
+      navigate('/homepage');
+    } catch (error) {
+      handleGoogleFailure(); // Call the failure handler
+    }
   };
 
   // Handle Google login failure
@@ -63,10 +81,9 @@ const Login = ({ authorized_true }) => {
           </button>
         <div style={{ marginTop: '15px' }}>Or</div>
         </p>
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess} // Reference the correct function
-          onError={handleGoogleFailure} // Handle login failure
-        />
+        <button className="google-login-button" onClick={handleGoogleSuccess}>
+          Login with Google
+        </button>
       </div>
     </div>
   );
