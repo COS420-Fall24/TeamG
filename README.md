@@ -12,11 +12,22 @@ Josh Wilbur: Developer
 
 Saurav Pokhrel: Designer
 
+
+# Installation:
+
+* In Virtual Studio Code, run the command: `git pull https://github.com/COS420-Fall24/TeamG`
+* `cd` into TeamG
+* Run: `npm install`
+* To see the webpage, run: `npm run start`
+* In website: Click "login with Google" to create an account.
+* Now, you should be at the homepage.
+
+
 # Mission Statement
 
 Make the world better, one program at a time!
 
-# Problem Statements
+# Problem Statement
 
 ****(1): Problem Statement**: The course planning interface can prevent students from effectively planning schedules, requiring that extensive time be spent or subpar courses taken.**
 
@@ -37,12 +48,3 @@ Make the world better, one program at a time!
 **Question**: How can we design a tool that people can use as a one stop shop for financial planning?**
 
 ---
-
-**Installation**:
-
-* In Virtual Studio Code, run the command: `git pull https://github.com/COS420-Fall24/TeamG`
-* `cd` into TeamG
-* Run: `npm install`
-* Run: `npm install @react-oauth/google react-router-dom@6` (required for sign in with google)
-* To see the webpage, run: `npm run start`
-* In website: enter admin/admin for credentials
