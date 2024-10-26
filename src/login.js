@@ -1,25 +1,42 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './login.css';
-import { auth } from "./firebase-config";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { db } from "./firebase-config"; // Import Firestore instance
 import { doc, setDoc } from "firebase/firestore"; // Firestore functions
 
 const Login = ({ authorized_true }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const auth = getAuth();
 
-  // Handle manual login
-  const handleLogin = () => {
-    if (username === 'admin' && password === 'admin') {
-      authorized_true(true);
-      navigate('/homepage');
-    } else {
-      alert('Invalid credentials');
-    }
-  };
+
+// Handle manual login
+const handleLogin = async () => {
+  signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+          const user = userCredential.user;
+          console.log("Logged in as:", user.email);
+          authorized_true(true);
+          setEmail("");
+          setPassword("");
+          navigate('/homepage');
+      })
+      .catch((error) => {
+          if (error.code === 'auth/wrong-password') {
+              alert("Incorrect password.");
+          } else if (error.code === 'auth/user-not-found') {
+              alert("No account associated with this email.");
+          } else if (error.code === 'auth/invalid-email') {
+              alert("Please enter a valid email address.");
+          } else {
+              alert("Login failed.");
+          }
+          console.error('Login error:', error.message);
+      });
+};
+
 
   // Handle successful Google login
   const handleGoogleSuccess = async () => {
@@ -57,9 +74,9 @@ const Login = ({ authorized_true }) => {
         <input
           type="text"
           className="login-input"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
