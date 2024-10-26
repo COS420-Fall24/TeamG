@@ -869,5 +869,8 @@
   "bugs": {
     "url": "https://github.com/COS420-Fall24/TeamG/issues"
   },
-  "homepage": "."
+  "homepage": ".",
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.2"
+  }
 }
