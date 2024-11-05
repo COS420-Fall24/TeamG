@@ -96,10 +96,10 @@ const handleLogin = async () => {
           >
             Click Here
           </button>
-        <div style={{ marginTop: '15px' }}>Or</div>
         </p>
+        <div style={{ marginTop: '15px' }}>Or</div>
         <button className="google-login-button" onClick={handleGoogleSuccess}>
-          Login with Google
+        Login with Google
         </button>
       </div>
     </div>
