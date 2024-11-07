@@ -43,6 +43,15 @@
     color: #ffffff;
 }
 
+/* Pie-chart */
+.pie-chart-container {
+    font-size: 24px;
+    color: #ffffff;
+    width: 40%; /* Adjust as needed */
+    margin: 0 auto;
+    padding-top: 20px;
+  }
+
 /* Action buttons container */
 .actions {
     flex: 2;
