@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Login from './login';
 import { MemoryRouter } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -39,4 +39,32 @@ describe('Login Component', () => {
 
     expect(emailInput.value).toBe('test@example.com');
     expect(passwordInput.value).toBe('password123');
+    }),
+
+    test('Test login failed', async () => {
+    window.alert = jest.fn(); // Mock window.alert
+
+    render(
+      <MemoryRouter>
+      <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+    const loginButton = document.querySelector('.login-button');
+
+    fireEvent.change(emailInput, { target: { value: 'admin@gmail.com' } });
+    fireEvent.change(passwordInput, { target: { value: '' } });
+
+    expect(emailInput.value).toBe('admin@gmail.com');
+    expect(passwordInput.value).toBe('');
+    
+    fireEvent.click(loginButton);
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('Login failed.');
+    });  
   }));
+
+
