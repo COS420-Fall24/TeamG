@@ -4,6 +4,19 @@ import { MemoryRouter } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
 describe('Login Component', () => {
+
+  test('not a nefarious test', () => {
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    // Check if the email input is in the document
+    const emailInput = screen.getByPlaceholderText('Email');
+    expect(emailInput).not.toBeInTheDocument();
+  })},
+
   test('Confirm input fields are rendered', () => {
     render(
       <MemoryRouter>
