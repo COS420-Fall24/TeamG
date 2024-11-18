@@ -4,19 +4,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
 describe('Login Component', () => {
-
-  test('not a nefarious test', () => {
-    render(
-      <MemoryRouter>
-        <Login authorized_true={() => {}} />
-      </MemoryRouter>
-    );
-
-    // Check if the email input is in the document
-    const emailInput = screen.getByPlaceholderText('Email');
-    expect(emailInput).not.toBeInTheDocument();
-  })},
-
   test('Confirm input fields are rendered', () => {
     render(
       <MemoryRouter>
@@ -33,9 +20,9 @@ describe('Login Component', () => {
     expect(passwordInput).toBeInTheDocument();
 
     // Check that login with Google is rendered
-    const loginGoogle = screen.getByText('Login with Google')
+    const loginGoogle = screen.getByText('Login with Google');
     expect(loginGoogle).toBeInTheDocument();
-  })},
+  });
 
   test('Test email/password input', () => {
     render(
@@ -52,14 +39,14 @@ describe('Login Component', () => {
 
     expect(emailInput.value).toBe('test@example.com');
     expect(passwordInput.value).toBe('password123');
-    }),
+  });
 
-    test('Test login failed', async () => {
+  test('Test login failed', async () => {
     window.alert = jest.fn(); // Mock window.alert
 
     render(
       <MemoryRouter>
-      <Login authorized_true={() => {}} />
+        <Login authorized_true={() => {}} />
       </MemoryRouter>
     );
 
@@ -72,12 +59,11 @@ describe('Login Component', () => {
 
     expect(emailInput.value).toBe('admin@gmail.com');
     expect(passwordInput.value).toBe('');
-    
+
     fireEvent.click(loginButton);
 
     await waitFor(() => {
       expect(window.alert).toHaveBeenCalledWith('Login failed.');
-    });  
-  }));
-
-
+    });
+  });
+});
