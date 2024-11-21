@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged, signOut, deleteUser, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { db } from './firebase-config';
 import './homepage.css';
 import Modal from './Modal.js';
@@ -12,13 +12,14 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 const Homepage = () => {
   const [catData, setCatData] = useState([]);
   const [catLabels, setCatLabels] = useState([]);
-  const [showModal, setShowModal] = useState({ log: false, update: false, new: false, income: false });
+  const [showModal, setShowModal] = useState({ log: false, update: false, new: false, income: false, deleteAccount: false });
   const [formData, setFormData] = useState({ amount: '', category: '', memo: '', oldCategory: '', newCategory: { name: '', amount: 0 }, income: '' });
   const [userId, setUserId] = useState(null);
   const [user, setUser] = useState(null);
   const [tutorial, setTutorial] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [income, setIncome] = useState(0);
+  const [password, setPassword] = useState(''); // Add state for password
 
   const tutorialSteps = [
     {
@@ -92,7 +93,7 @@ const Homepage = () => {
   };
 
   const handleCloseModal = () => {
-    setShowModal({ log: false, update: false, new: false, income: false });
+    setShowModal({ log: false, update: false, new: false, income: false, deleteAccount: false });
     setFormData({ amount: '', category: '', memo: '', oldCategory: '', newCategory: { name: '', amount: 0 }, income: '' });
   };
 
@@ -247,6 +248,35 @@ const Homepage = () => {
     }
   };
 
+  const handleLogout = async () => {
+    const auth = getAuth();
+    try {
+      await signOut(auth);
+      console.log('User logged out successfully');
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout error:', error.message);
+      alert('Logout failed');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (user && userId) {
+      const userDocRef = doc(db, 'users', userId);
+      try {
+        await deleteDoc(userDocRef);
+        await deleteUser(user);
+        console.log('Account and data deleted successfully');
+        window.location.href = '/';
+      } catch (error) {
+        console.error('Account deletion error:', error.message);
+        alert('Account deletion failed');
+      }
+    } else {
+      console.error('No user is currently authenticated');
+    }
+  };
+
   const totalCategoryAmount = catData.reduce((a, b) => a + b, 0);
   const remainingAmount = Math.max(0, income - totalCategoryAmount);
 
@@ -388,10 +418,17 @@ const Homepage = () => {
         </form>
       </Modal>
 
+      <Modal show={showModal.deleteAccount} onClose={handleCloseModal}>
+        <h2>Delete Account</h2>
+        <p>Are you sure you want to delete your account? This will erase all data associated with the account and is irreversible.</p>
+        <button onClick={handleDeleteAccount}>Yes, I'm sure</button>
+        <button onClick={handleCloseModal}>Go back</button>
+      </Modal>
+
       <div className="footer">
         <p>
           <a href="#">Account Info</a> | <button onClick={handleTutorialClick}>Tutorial</button> | <a href="#">Privacy Policy</a> | <a href="#">Contact</a> | 
-          <a href="#">Disclaimer</a> | <a href="#">Downtime Information</a> | <button onClick={handleClearData}>Clear Data</button>
+          <a href="#">Disclaimer</a> | <a href="#">Downtime Information</a> | <button onClick={handleClearData}>Clear Data</button> | <button onClick={handleLogout}>Logout</button> | <button onClick={() => handleOpenModal('deleteAccount')}>Delete Account</button>
         </p>
       </div>
     </div>

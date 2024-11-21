@@ -4,6 +4,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google'; // Import GoogleOAuth
 import Login from './login'; 
 import Homepage from './homepage'; 
 import CreateAccount from './CreateAccount'; 
+import Logout from './logout';
 
 // Google OAuth Client ID
 const GOOGLE_CLIENT_ID = '766737585066-4fqae74ec3k614ja384b2i50uehbr3io.apps.googleusercontent.com';
@@ -24,6 +25,10 @@ function App() {
           <Route 
             path="/homepage" 
             element={is_authenticated ? <Homepage /> : <Navigate to="/" />} 
+          />
+          <Route 
+            path="/logout" 
+            element={<Logout authorized_true={authorized_true} />} 
           />
           {/* Fallback Route */}
           <Route path="*" element={<Navigate to="/" />} />
