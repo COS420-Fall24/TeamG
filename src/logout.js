@@ -12,6 +12,7 @@ const Logout = ({ authorized_true }) => {
       console.log('User logged out successfully');
       authorized_true(false);
       navigate('/');
+      alert('Logout successful');
     } catch (error) {
       console.error('Logout error:', error.message);
       alert('Logout failed');
