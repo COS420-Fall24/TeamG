@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Homepage from './homepage';
 import { MemoryRouter } from 'react-router-dom';
 
-describe('Homepage Component', () => {
+describe('Homepage Tests', () => {
     test('Confirm homepage components', () => {
         render(
             <MemoryRouter>
@@ -58,7 +58,7 @@ describe('Homepage Component', () => {
           expect(catAmt.value).toBe('1000');
     });
 
-    test('Test log transaction', async() => {
+    test('Test log transaction', () => {
         render(
             <MemoryRouter>
               <Homepage authorized_true={() => {}} />

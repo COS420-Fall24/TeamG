@@ -3,7 +3,7 @@ import Login from './login';
 import { MemoryRouter } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
-describe('Login Component', () => {
+describe('Login Tests', () => {
   test('Confirm input fields are rendered', () => {
     render(
       <MemoryRouter>
