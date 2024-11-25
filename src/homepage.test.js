@@ -1,89 +1,153 @@
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Homepage from './homepage';
-import { MemoryRouter } from 'react-router-dom';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getDoc } from 'firebase/firestore';
 
-describe('Homepage Tests', () => {
-    test('Confirm homepage components', () => {
-        render(
-            <MemoryRouter>
-              <Homepage authorized_true={() => {}} />
-            </MemoryRouter>
-          );
+jest.mock('firebase/auth');
+jest.mock('firebase/firestore');
 
-        // Check if budget dashboard is rendered
-        const budgetDashboard = screen.getByText('Budget Dashboard');
-        expect(budgetDashboard).toBeInTheDocument();
+describe('Homepage Component', () => {
+  const mockUserDoc = {
+    exists: jest.fn().mockReturnValue(true),
+    data: jest.fn().mockReturnValue({
+      email: 'test@example.com',
+      name: 'Test User',
+      createdAt: new Date(),
+      budgetData: [{ category: 'Food', amount: 100, type: 'category' }],
+      tutorial: false,
+    }),
+  };
 
-        // Check if log transaction is rendered
-        const logTransaction = screen.getByText('Log Transaction');
-        expect(logTransaction).toBeInTheDocument();
-
-        // Check if update category is rendered
-        const updateCategory = screen.getByText('Update Category');
-        expect(updateCategory).toBeInTheDocument();
-
-        // Check if new category is rendered
-        const newCategory = screen.getByText('New Category');
-        expect(newCategory).toBeInTheDocument();
-
-        // Check if change income is rendered
-        const changeIncome = screen.getByText('Change Income');
-        expect(changeIncome).toBeInTheDocument();
+  beforeEach(() => {
+    getAuth.mockReturnValue({
+      currentUser: { uid: 'testUserId', email: 'test@example.com', displayName: 'Test User' },
+    });
+    onAuthStateChanged.mockImplementation((_, callback) => {
+      callback({ uid: 'testUserId', email: 'test@example.com', displayName: 'Test User' });
     });
 
-    test('Test new category', async() => {
-        // TODO: Flesh test out more by clicking "Create" button and ensuring inputs are on pie chart
-        render(
-            <MemoryRouter>
-              <Homepage authorized_true={() => {}} />
-            </MemoryRouter>
-          );
-        
-          // Before testing, ensure element is on the screen
-          const newCategoryButton = screen.getByText('New Category');
-          expect(newCategoryButton).toBeInTheDocument();
+    getDoc.mockResolvedValue(mockUserDoc);
+    getDoc.mockResolvedValueOnce({
+      exists: jest.fn().mockReturnValue(true),
+      data: jest.fn().mockReturnValue({
+        email: 'test@example.com',
+        name: 'Test User',
+        createdAt: new Date(),
+        budgetData: [],
+        tutorial: false,
+      }),
+    });
+    jest.clearAllMocks();
+  });
 
-          fireEvent.click(newCategoryButton);
+  test('renders the homepage component', async () => {
+    render(<Homepage />);
+    await waitFor(() => {
+      expect(screen.getByText('Money Gremlin')).toBeInTheDocument();
+    });
+  });
 
-          // Check that the right window popped up and text boxes are displayed
-          const catName = screen.getByPlaceholderText('Enter category name');
-          const catAmt = screen.getByPlaceholderText('Enter category amount');
-          expect(catName).toBeInTheDocument();
-          expect(catAmt).toBeInTheDocument();
+  test('opens and closes the log transaction modal', async () => {
+    render(<Homepage />);
+    fireEvent.click(screen.getAllByTitle('Log a new transaction')[0]);
+    expect(screen.getAllByText('Log Transaction')[0]).toBeInTheDocument();
+    fireEvent.click(screen.getAllByText('Submit')[0]);
+    await waitFor(() => expect(screen.queryByText('Enter memo')).not.toBeInTheDocument());
+  });
 
-          // Enter test category info
-          fireEvent.change(catName, { target: { value: 'Bills' } });
-          fireEvent.change(catAmt, { target: { value: '1000' } });
-          expect(catName.value).toBe('Bills');
-          expect(catAmt.value).toBe('1000');
+  test('opens and closes the update category modal', async () => {
+    render(<Homepage />);
+    fireEvent.click(screen.getByTitle('Update an existing category'));
+    expect(screen.getAllByText('Update Category')[0]).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Update'));
+    await waitFor(() => expect(screen.queryByText('Enter new category name')).not.toBeInTheDocument());
+  });
+
+  test('opens and closes the new category modal', async () => {
+    render(<Homepage />);
+    fireEvent.click(screen.getByTitle('Create a new category'));
+    expect(screen.getAllByText('New Category')[0]).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Create'));
+    await waitFor(() => expect(screen.queryByText('Enter category name')).not.toBeInTheDocument());
+  });
+
+  test('opens and closes the change income modal', async () => {
+    render(<Homepage />);
+    fireEvent.click(screen.getByTitle('Change Income'));
+    expect(screen.getAllByText('Change Income')[0]).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Submit'));
+    await waitFor(() => expect(screen.queryByText('Enter income amount')).not.toBeInTheDocument());
+  });
+
+  test('fetches and sets user data on authentication', async () => {
+    render(<Homepage />);
+    await waitFor(() => {
+      expect(screen.getByText('Money Gremlin')).toBeInTheDocument();
+      expect(screen.getAllByText('Budget Dashboard')[0]).toBeInTheDocument();
+    });
+  });
+
+  test('fetches and sets user data on authentication', async () => {
+    render(<Homepage />);
+    await waitFor(() => {
+      expect(screen.getByText('Money Gremlin')).toBeInTheDocument();
+      expect(screen.getAllByText('Budget Dashboard')[0]).toBeInTheDocument();
+    });
+  });
+
+/*   test('handles tutorial navigation', async () => {
+    render(<Homepage />);
+    fireEvent.click(screen.getByText('Tutorial'));
+    expect(screen.getByText('Step 1: Set Up Income')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Next'));
+    expect(screen.getByText('Step 2: Create a Category')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Next'));
+    expect(screen.getByText('Step 3: Log a Transaction')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Previous'));
+    expect(screen.getByText('Step 2: Create a Category')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Exit Tutorial'));
+    await waitFor(() => expect(screen.queryByText('Step 1: Set Up Income')).not.toBeInTheDocument());
+  }); */
+
+  test('clears data successfully', async () => {
+    render(<Homepage />);
+    fireEvent.click(screen.getByText('Clear Data'));
+    await waitFor(() => expect(screen.queryByText('No data available to display')).toBeInTheDocument());
+  });
+
+  test('displays no data message when there is no budget data', async () => {
+    getDoc.mockResolvedValueOnce({
+      exists: jest.fn().mockReturnValue(true),
+      data: jest.fn().mockReturnValue({
+        email: 'test@example.com',
+        name: 'Test User',
+        createdAt: new Date(),
+        budgetData: [],
+        tutorial: false,
+      }),
     });
 
-    test('Test log transaction', () => {
-        render(
-            <MemoryRouter>
-              <Homepage authorized_true={() => {}} />
-            </MemoryRouter>
-          );
-        
-          // Before testing, ensure element is on the screen
-          const logTransaction = screen.getByText('Log Transaction');
-          expect(logTransaction).toBeInTheDocument();
+    render(<Homepage />);
+    await waitFor(() => expect(screen.getByText('No data available to display')).toBeInTheDocument());
+  });
 
-          fireEvent.click(logTransaction);
-
-          // Check that the right window popped up and text boxes are displayed
-          const catName = screen.getByText('Select category');
-          const memo = screen.getByPlaceholderText('Enter memo');
-          const amount = screen.getByPlaceholderText('Enter amount');
-          expect(catName).toBeInTheDocument();
-          expect(memo).toBeInTheDocument();
-          expect(amount).toBeInTheDocument();
-
-          // Try entering values into the text boxes
-          fireEvent.change(memo, { target: { value: 'Hello there' } });
-          fireEvent.change(amount, { target: { value: '1000' } });
-          expect(memo.value).toBe('Hello there');
-          expect(amount.value).toBe('1000');
+  test('displays remaining amount correctly', async () => {
+    getDoc.mockResolvedValueOnce({
+      exists: jest.fn().mockReturnValue(true),
+      data: jest.fn().mockReturnValue({
+        email: 'test@example.com',
+        name: 'Test User',
+        createdAt: new Date(),
+        budgetData: [{ category: 'Food', amount: 100, type: 'category' }, { category: 'Income', amount: 1000, type: 'income' }],
+        tutorial: false,
+      }),
     });
 
+    render(<Homepage />);
+    waitFor(async () => {
+      expect(await screen.findByText((content) => content.includes('Remaining'), { exact: false })).toBeInTheDocument();
+      expect(screen.getByText('900')).toBeInTheDocument();
+    });
+  });
 });

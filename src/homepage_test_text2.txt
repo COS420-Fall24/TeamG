@@ -1,0 +1,239 @@
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import Homepage from './homepage'; // Adjust the import based on your file structure
+
+// Mock Firebase authentication
+jest.mock('firebase/auth', () => ({
+    getAuth: jest.fn(),
+    onAuthStateChanged: jest.fn(),
+  }));
+  
+// Mock Firestore function
+jest.mock('firebase/firestore', () => ({
+    doc: jest.fn(),
+    getDoc: jest.fn(),
+    updateDoc: jest.fn(),
+    getFirestore: jest.fn(),
+}));
+  
+describe('Homepage Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  
+  test('renders tutorial button again', async () => {
+      render(<Homepage />);
+      const tutorialButton = await screen.findByText(/tutorial/i);
+      expect(tutorialButton).toBeInTheDocument();
+  });
+  
+  test('opens tutorial', async () => {
+    // Mock user authentication
+    const mockUser = { uid: '123', email: 'test@example.com' };
+    onAuthStateChanged.mockImplementation((auth, callback) => callback(mockUser));
+
+    // Mock Firestore document
+    getDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ tutorial: true, budgetData: [] }),
+    });
+    updateDoc.mockResolvedValue();
+
+    render(<Homepage />);
+    const tutorialButton = await screen.findByText(/tutorial/i);
+    fireEvent.click(tutorialButton);
+
+    await waitFor(() => {
+      const tutorialTitle = screen.getByText(/Step 1: Set Up Income/i);
+      expect(tutorialTitle).toBeInTheDocument();
+    });
+  });
+  
+  test('navigates tutorial steps', async () => {
+    // Mock user authentication
+    const mockUser = { uid: '123', email: 'test@example.com' };
+    getAuth.mockReturnValue({ currentUser: mockUser });
+    onAuthStateChanged.mockImplementation((auth, callback) => callback(mockUser));
+
+    // Mock Firestore document
+    getDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ tutorial: true, budgetData: [] }),
+    });
+    updateDoc.mockResolvedValue();
+
+    render(<Homepage />);
+    const tutorialButton = await screen.findByText(/tutorial/i);
+    fireEvent.click(tutorialButton);
+
+    const nextButton = await screen.findByText(/Next/i);
+    fireEvent.click(nextButton);
+
+    await waitFor(() => {
+      const step2Title = screen.getByText(/Step 2: Create a Category/i);
+      expect(step2Title).toBeInTheDocument();
+    });
+  
+    const prevButton = await screen.findByText(/Previous/i);
+    fireEvent.click(prevButton);
+  
+    await waitFor(() => {
+      const step1Title = screen.getByText(/Step 1: Set Up Income/i);
+      expect(step1Title).toBeInTheDocument();
+    });
+  });
+  
+    test('exits tutorial', async () => {
+      // Mock user authentication
+      const mockUser = { uid: '123', email: 'test@example.com' };
+      getAuth.mockReturnValue({ currentUser: mockUser });
+      onAuthStateChanged.mockImplementation((auth, callback) => callback(mockUser));
+  
+      // Mock Firestore document
+      getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({ tutorial: true, budgetData: [] }),
+      });
+      updateDoc.mockResolvedValue();
+  
+      render(<Homepage />);
+      const tutorialButton = await screen.findByText(/tutorial/i);
+      fireEvent.click(tutorialButton);
+  
+      const exitButton = await screen.findByText(/Exit Tutorial/i);
+      fireEvent.click(exitButton);
+  
+      await waitFor(() => {
+        const tutorialTitle = screen.queryByText(/Step 1: Set Up Income/i);
+        expect(tutorialTitle).not.toBeInTheDocument();
+      });
+    });
+
+
+
+test('renders homepage', () => {
+    render(<Homepage />);
+    const headerElement = screen.getByText(/money gremlin/i);
+    expect(headerElement).toBeInTheDocument();
+});
+
+test('renders budget dashboard', () => {
+    render(<Homepage />);
+    const dashboardElement = screen.getByText(/budget dashboard/i);
+    expect(dashboardElement).toBeInTheDocument();
+});
+
+test('renders log transaction button', () => {
+    render(<Homepage />);
+    const logButton = screen.getByTitle(/log a new transaction/i);
+    expect(logButton).toBeInTheDocument();
+});
+
+test('opens log transaction modal', () => {
+    render(<Homepage />);
+    const logButton = screen.getByTitle(/log a new transaction/i);
+    fireEvent.click(logButton);
+    const modalTitles = screen.getAllByText(/log transaction/i);
+    expect(modalTitles.length).toBeGreaterThan(0);
+});
+
+test('renders update category button', () => {
+    render(<Homepage />);
+    const updateButton = screen.getByTitle(/update an existing category/i);
+    expect(updateButton).toBeInTheDocument();
+});
+
+test('opens update category modal', () => {
+    render(<Homepage />);
+    const updateButton = screen.getByTitle(/update an existing category/i);
+    fireEvent.click(updateButton);
+    const modalTitles = screen.getAllByText(/update category/i);
+    expect(modalTitles.length).toBeGreaterThan(0);
+});
+
+test('renders new category button', () => {
+    render(<Homepage />);
+    const newButton = screen.getByTitle(/create a new category/i);
+    expect(newButton).toBeInTheDocument();
+});
+
+test('opens new category modal', () => {
+    render(<Homepage />);
+    const newButton = screen.getByTitle(/create a new category/i);
+    fireEvent.click(newButton);
+    const modalTitles = screen.getAllByText(/new category/i);
+    expect(modalTitles.length).toBeGreaterThan(0);
+});
+
+test('renders change income button', () => {
+    render(<Homepage />);
+    const incomeButton = screen.getByTitle(/change income/i);
+    expect(incomeButton).toBeInTheDocument();
+});
+
+test('opens change income modal', () => {
+    render(<Homepage />);
+    const incomeButton = screen.getByTitle(/change income/i);
+    fireEvent.click(incomeButton);
+    const modalTitles = screen.getAllByText(/change income/i);
+    expect(modalTitles.length).toBeGreaterThan(0);
+});
+
+test('renders tutorial button', async () => {
+    render(<Homepage />);
+    const tutorialButton = await screen.findByText(/tutorial/i);
+    expect(tutorialButton).toBeInTheDocument();
+});
+
+test('opens tutorial and displays first step', async () => {
+  render(<Homepage />);
+  const tutorialButton = await screen.findByText(/tutorial/i);
+  fireEvent.click(tutorialButton);
+  await waitFor(() => {
+    const tutorialTitle = screen.getByText(/Step 1: Set Up Income/i);
+    expect(tutorialTitle).toBeInTheDocument();
+  });
+});
+
+test('navigates tutorial steps', async () => {
+    render(<Homepage />);
+    const tutorialButton = await screen.findByText(/tutorial/i);
+
+    fireEvent.click(tutorialButton);
+
+    const nextButton = await screen.findByText(/Next/i);
+
+    fireEvent.click(nextButton);
+
+    const step2Title = await screen.findByText(/Step 2: Create a Category/i);
+
+    expect(step2Title).toBeInTheDocument();
+
+    const prevButton = await screen.findByText(/Previous/i);
+
+    fireEvent.click(prevButton);
+
+    const step1Title = await screen.findByText(/Step 1: Set Up Income/i);
+
+    expect(step1Title).toBeInTheDocument();
+
+});
+
+test('exits tutorial', async () => {
+    render(<Homepage />);
+    const tutorialButton = await screen.findByText(/tutorial/i);
+    fireEvent.click(tutorialButton);
+    const exitButton = await screen.findByText(/Exit Tutorial/i);
+    fireEvent.click(exitButton);
+    const tutorialTitle = screen.queryByText(/step 1: set up income/i);
+    expect(tutorialTitle).not.toBeInTheDocument();
+});
+
+test('clears data', () => {
+    render(<Homepage />);
+    const clearDataButton = screen.getByText(/clear data/i);
+    fireEvent.click(clearDataButton);
+    const noDataMessage = screen.getByText(/no data available to display/i);
+    expect(noDataMessage).toBeInTheDocument();
+  });
+});
