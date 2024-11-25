@@ -50,7 +50,7 @@
     width: 40%; /* Adjust as needed */
     margin: 0 auto;
     padding-top: 20px;
-  }
+}
 
 /* Action buttons container */
 .actions {
@@ -98,6 +98,7 @@
     color: #45a049;
     text-decoration: underline;
 }
+
 .tutorial-overlay {
     position: fixed;
     top: 0;
@@ -118,20 +119,24 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Transaction history table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
 
+th, td {
+    border: 1px solid #555555;
+    padding: 10px;
+    text-align: left;
+    color: #ffffff;
+}
 
+th {
+    background-color: #333333;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+td {
+    background-color: #222222;
+}
