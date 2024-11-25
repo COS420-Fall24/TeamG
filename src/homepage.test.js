@@ -109,6 +109,7 @@ describe('Homepage Component', () => {
       }),
     });
 
+    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
 
     await React.act( async () => {
       render(<Homepage />);
@@ -120,6 +121,10 @@ describe('Homepage Component', () => {
 
     expect(screen.getByText('Tutorial')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Tutorial'));
+    
+    expect(consoleLogSpy).toHaveBeenCalledWith('Clicked!');
+    expect(consoleLogSpy).toHaveBeenCalledWith('User and userId exist');
+    expect(consoleLogSpy).toHaveBeenCalledWith('UserDocRef created');
     
 
     expect(screen.queryByText('Next')).not.toBeInTheDocument();
