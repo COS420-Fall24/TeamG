@@ -34,7 +34,7 @@ const CreateAccount = () => {
       console.error('Sign up error:', error.message);
 
       if (error.code === 'auth/email-already-in-use') {
-        alert("This email is already registered");
+        alert("This email is already registered. If you have deleted this account, please try again.");
       } else if (error.code === 'auth/weak-password') {
         alert("Password must be at least 6 characters");
       } else {
