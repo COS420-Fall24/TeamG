@@ -84,7 +84,7 @@ const Homepage = () => {
       }
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
   const handleOpenModal = (type) => {
