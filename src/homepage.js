@@ -20,6 +20,7 @@ const Homepage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [income, setIncome] = useState(0);
   const [password, setPassword] = useState(''); // Add state for password
+  const [transactionHistory, setTransactionHistory] = useState([]); // Add state for transaction history
 
   const tutorialSteps = [
     {
@@ -133,6 +134,9 @@ const Homepage = () => {
               return entry;
             });
             await updateDoc(userDocRef, { budgetData: updatedData });
+
+            // Add new transaction to the top of the transaction history
+            setTransactionHistory(prevHistory => [{ category: formData.category, memo: formData.memo, amount: formData.amount }, ...prevHistory]);
           } else if (type === 'update') {
             updatedData = currentData.map((entry) =>
               entry.category === formData.oldCategory ? { ...entry, category: formData.newCategory.name, amount: parseInt(formData.newCategory.amount), type: 'category' } : entry
@@ -151,7 +155,6 @@ const Homepage = () => {
             updatedData.push(incomeEntry);
             await updateDoc(userDocRef, { budgetData: updatedData });
             setIncome(incomeEntry.amount);
-            console.log('Income updated successfully');
           }
 
           setCatData(updatedData.filter(entry => entry.type === 'category').map((entry) => entry.amount));
@@ -178,7 +181,6 @@ const Homepage = () => {
           );
           setCatData(updatedData.filter(entry => entry.type === 'category').map((entry) => entry.amount));
           setCatLabels(updatedData.filter(entry => entry.type === 'category').map((entry) => entry.category));
-          console.log('Document created/updated successfully');
         }
 
         handleCloseModal();
@@ -317,23 +319,7 @@ const Homepage = () => {
 
   return (
     <div className="homepage-container">
-      {tutorial && (
-        <div className="tutorial-overlay">
-          <div className="tutorial-box" style={tutorialBoxStyle}>
-            <h2>{tutorialSteps[currentStep].title}</h2>
-            <p>{tutorialSteps[currentStep].content}</p>
-            <div className="tutorial-navigation">
-              <button onClick={handlePrevStep} disabled={currentStep === 0}>Previous</button>
-              <button onClick={handleNextStep} disabled={currentStep === tutorialSteps.length - 1}>Next</button>
-              <button onClick={handleExitTutorial}>Exit Tutorial</button>
-            </div>
-          </div>
-        </div>
-      )}
-      <div className="header">
-        <h1>Money Gremlin</h1>
-      </div>
-
+      <div className="header">Money Gremlin</div>
       <div className="content">
         <div className="dashboard">
           <h2>Budget Dashboard</h2>
@@ -345,7 +331,6 @@ const Homepage = () => {
             )}
           </div>
         </div>
-
         <div className="actions">
           <div className="action-button" title="Log a new transaction" onClick={() => handleOpenModal('log')}>
             Log Transaction
@@ -358,6 +343,9 @@ const Homepage = () => {
           </div>
           <div className="action-button" title="Change Income" onClick={() => handleOpenModal('income')}>
             Change Income
+          </div>
+          <div className="action-button" title="View Transaction History" onClick={() => handleOpenModal('history')}>
+            Transaction History
           </div>
         </div>
       </div>
@@ -416,6 +404,28 @@ const Homepage = () => {
           <input type="number" name="income" value={formData.income} onChange={handleInputChange} placeholder="Enter income amount" required />
           <button type="submit">Submit</button>
         </form>
+      </Modal>
+
+      <Modal show={showModal.history} onClose={handleCloseModal}>
+        <h2>Transaction History</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Memo</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {transactionHistory.map((transaction, index) => (
+              <tr key={index}>
+                <td>{transaction.category}</td>
+                <td>{transaction.memo}</td>
+                <td>{transaction.amount}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </Modal>
 
       <Modal show={showModal.deleteAccount} onClose={handleCloseModal}>
