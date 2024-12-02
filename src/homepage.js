@@ -6,6 +6,7 @@ import { getAuth, onAuthStateChanged, signOut, deleteUser, reauthenticateWithCre
 import { db } from './firebase-config';
 import './homepage.css';
 import Modal from './Modal.js';
+import { set } from 'lodash';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -19,8 +20,8 @@ const Homepage = () => {
   const [tutorial, setTutorial] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [income, setIncome] = useState(0);
-  const [password, setPassword] = useState(''); // Add state for password
-  const [transactionHistory, setTransactionHistory] = useState([]); // Add state for transaction history
+  const [password, setPassword] = useState('');
+  const [transactionHistory, setTransactionHistory] = useState([]);
 
   const tutorialSteps = [
     {
@@ -78,6 +79,19 @@ const Homepage = () => {
           setCatData(amounts);
           setCatLabels(categories);
           setTutorial(userData.tutorial || false);
+
+          const transactions = budgetData
+            .filter(entry => entry.type === 'category')
+            .flatMap(entry => entry.transactions || [])
+            .map(transaction => ({
+              category: transaction.category,
+              memo: transaction.memo,
+              amount: transaction.amount,
+              date: transaction.date,
+              time: transaction.time
+            }))
+            .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+          setTransactionHistory(transactions);
         } catch (error) {
           console.error('Error checking or creating user document:', error);
         }
@@ -126,17 +140,25 @@ const Homepage = () => {
           const currentData = userDoc.data().budgetData || [];
 
           if (type === 'log') {
-            const newTransaction = { amount: parseInt(formData.amount), memo: formData.memo, type: 'transaction' };
+            const newTransaction = { 
+              amount: parseInt(formData.amount), 
+              memo: formData.memo, 
+              type: 'transaction',
+              date: new Date().toLocaleDateString(),
+              time: new Date().toLocaleTimeString(), 
+              category: formData.category
+            };
             updatedData = currentData.map((entry) => {
               if (entry.category === formData.category && entry.type === 'category') {
-                return { ...entry, transactions: [...(entry.transactions || []), newTransaction] };
+                return { ...entry, transactions: [newTransaction, ...(entry.transactions || [])] };
               }
               return entry;
             });
-            await updateDoc(userDocRef, { budgetData: updatedData });
 
-            // Add new transaction to the top of the transaction history
-            setTransactionHistory(prevHistory => [{ category: formData.category, memo: formData.memo, amount: formData.amount }, ...prevHistory]);
+            await setDoc(userDocRef, { budgetData: updatedData }, { merge: true });
+            setFormData({...formData, amount: '', memo: ''});
+
+            setTransactionHistory(prevHistory => [{ ...newTransaction }, ...prevHistory]);
           } else if (type === 'update') {
             updatedData = currentData.map((entry) =>
               entry.category === formData.oldCategory ? { ...entry, category: formData.newCategory.name, amount: parseInt(formData.newCategory.amount), type: 'category' } : entry
@@ -166,6 +188,8 @@ const Homepage = () => {
             memo: formData.memo,
             amount: parseInt(formData.amount),
             type: 'transaction',
+            date: new Date().toLocaleDateString(),
+            time: new Date().toLocaleTimeString()
           };
           updatedData = [newEntry];
 
@@ -241,6 +265,7 @@ const Homepage = () => {
         await updateDoc(userDocRef, { budgetData: [] });
         setCatData([]);
         setCatLabels([]);
+        setTransactionHistory([]);
         console.log('Data cleared successfully');
       } catch (error) {
         console.error('Error clearing data:', error);
@@ -410,7 +435,9 @@ const Homepage = () => {
         <h2>Transaction History</h2>
         <table>
           <thead>
-            <tr>
+            <tr>              
+              <th>Date</th>
+              <th>Time</th> 
               <th>Category</th>
               <th>Memo</th>
               <th>Amount</th>
@@ -418,7 +445,9 @@ const Homepage = () => {
           </thead>
           <tbody>
             {transactionHistory.map((transaction, index) => (
-              <tr key={index}>
+              <tr key={index}>                
+                <td>{transaction.date}</td>
+                <td>{transaction.time}</td>
                 <td>{transaction.category}</td>
                 <td>{transaction.memo}</td>
                 <td>{transaction.amount}</td>
