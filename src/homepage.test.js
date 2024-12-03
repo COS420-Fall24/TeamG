@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act }  from 'react';
 import Homepage from './homepage';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getDoc } from 'firebase/firestore';
@@ -96,19 +97,45 @@ describe('Homepage Component', () => {
     });
   });
 
-/*   test('handles tutorial navigation', async () => {
-    render(<Homepage />);
+  test('handles tutorial navigation', async () => {
+    getDoc.mockResolvedValueOnce({
+      exists: jest.fn().mockReturnValue(true),
+      data: jest.fn().mockReturnValue({
+        email: 'eric.jestel@maine.edu',
+        name: 'Test User',
+        createdAt: new Date(),
+        budgetData: [],
+        tutorial: true,
+      }),
+    });
+
+
+    await React.act( async () => {
+      render(<Homepage />);
+    });
+
+    //Confirm that tutorial isn't open
+    expect(screen.queryByText('Next')).not.toBeInTheDocument();
+
+
+    expect(screen.getByText('Tutorial')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Tutorial'));
-    expect(screen.getByText('Step 1: Set Up Income')).toBeInTheDocument();
+    
+
+    expect(screen.queryByText('Next')).not.toBeInTheDocument();
+
+    await waitFor( () => {expect(screen.getByText('Next')).toBeInTheDocument()
+    });
     fireEvent.click(screen.getByText('Next'));
-    expect(screen.getByText('Step 2: Create a Category')).toBeInTheDocument();
+
+    expect(screen.getByText('Next')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Next'));
-    expect(screen.getByText('Step 3: Log a Transaction')).toBeInTheDocument();
+    expect(screen.getByText('Previous')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Previous'));
-    expect(screen.getByText('Step 2: Create a Category')).toBeInTheDocument();
+    expect(screen.getByText('Exit Tutorial')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Exit Tutorial'));
-    await waitFor(() => expect(screen.queryByText('Step 1: Set Up Income')).not.toBeInTheDocument());
-  }); */
+    await waitFor(() => expect(screen.queryByText('Exit Tutorial')).not.toBeInTheDocument());
+  }); 
 
   test('clears data successfully', async () => {
     render(<Homepage />);
