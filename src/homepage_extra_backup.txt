@@ -1,0 +1,62 @@
+import Header from '../../components/Header';
+import BudgetDashboard from '../../components/BudgetDashboard';
+import ActionButtons from '../../components/ActionButtons';
+import Footer from '../../components/Footer';
+import TutorialOverlay from '../../components/Tutorial';
+import { 
+  LogTransactionModal, 
+  UpdateCategoryModal, 
+  NewCategoryModal, 
+  IncomeModal, 
+  DeleteAccountModal 
+} from '../../components/Modals';
+import { useAuth } from '../../hooks/useAuth';
+import { useBudgetData } from '../../hooks/useBudgetData';
+import { useTutorial } from '../../hooks/useTutorial';
+import './Homepage.css';
+
+const Homepage = () => {
+  const [activeModal, setActiveModal] = useState(null);
+  const { user, handleLogout, handleDeleteAccount } = useAuth();
+  const { catData, catLabels, income, handleFormSubmit } = useBudgetData();
+  const { tutorial, currentStep, handleTutorialActions } = useTutorial();
+
+  return (
+    <div className="homepage-container">
+      {tutorial && (
+        <TutorialOverlay 
+          currentStep={currentStep}
+          onAction={handleTutorialActions}
+        />
+      )}
+      
+      <Header />
+
+      <div className="content">
+        <BudgetDashboard 
+          catData={catData}
+          catLabels={catLabels}
+          income={income}
+        />
+        <ActionButtons onActionClick={setActiveModal} />
+      </div>
+
+      <LogTransactionModal 
+        show={activeModal === 'log'}
+        onClose={() => setActiveModal(null)}
+        onSubmit={handleFormSubmit}
+        categories={catLabels}
+      />
+      {/* Other modals... */}
+
+      <Footer 
+        onTutorialClick={handleTutorialActions.start}
+        onLogoutClick={handleLogout}
+        onDeleteAccountClick={() => setActiveModal('deleteAccount')}
+      />
+    </div>
+  );
+};
+
+export default Homepage;
+
