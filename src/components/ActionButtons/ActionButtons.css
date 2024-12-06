@@ -1,0 +1,20 @@
+.actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 1rem;
+    }
+    
+    .action-button {
+      padding: 0.5rem 1rem;
+      background-color: #66AA11;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .action-button:hover {
+      background-color: #558800;
+    }
