@@ -99,7 +99,7 @@ describe('BudgetDashboard', () => {
       
       // Wait for state update and check for back button
       await waitFor(() => {
-        const backButton = screen.getByRole('button', { name: /back to overview/i });
+        const backButton = screen.getByRole('button', { name:  /←/i });
         expect(backButton).toBeInTheDocument();
       });
     });  
@@ -173,7 +173,7 @@ describe('BudgetDashboard', () => {
       
       // Wait for the transaction view to appear
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /back to overview/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name:  /←/i })).toBeInTheDocument();
       });
       
       // Get the chart data after switching to transaction view
@@ -218,7 +218,7 @@ describe('BudgetDashboard', () => {
       fireEvent.click(pieChart);
       
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /back to overview/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name:  /←/i })).toBeInTheDocument();
       });
       
       const transactionPieChart = screen.getByTestId('mock-pie-chart');
