@@ -1,0 +1,28 @@
+.footer {
+      padding: 20px;
+      text-align: center;
+      background-color: #1a1d23;
+    }
+    
+    .footer button {
+      background: none;
+      border: none;
+      color: #66AA11;
+      cursor: pointer;
+      padding: 0 10px;
+      font-size: 1em;
+    }
+    
+    .footer button:hover {
+      color: #558800;
+    }
+    
+    .footer a {
+      color: #66AA11;
+      text-decoration: none;
+      padding: 0 10px;
+    }
+    
+    .footer a:hover {
+      color: #558800;
+    }

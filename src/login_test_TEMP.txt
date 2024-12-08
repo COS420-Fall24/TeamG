@@ -1,0 +1,562 @@
+
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
+  signInWithPopup: jest.fn(),
+  GoogleAuthProvider: jest.fn(),
+}));
+
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(),
+  doc: jest.fn(),
+  setDoc: jest.fn(),
+  getDoc: jest.fn(),
+}));
+
+describe('Login Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('Confirm input fields are rendered', () => {
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    expect(emailInput).toBeInTheDocument();
+
+    const passwordInput = screen.getByPlaceholderText('Password');
+    expect(passwordInput).toBeInTheDocument();
+
+    const loginGoogle = screen.getByText('Login with Google');
+    expect(loginGoogle).toBeInTheDocument();
+  });
+
+  test('Test email/password input', () => {
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+
+    expect(emailInput.value).toBe('test@example.com');
+    expect(passwordInput.value).toBe('password123');
+  });
+
+  test('Test login failed with incorrect password', async () => {
+    window.alert = jest.fn();
+    signInWithEmailAndPassword.mockRejectedValue({ code: 'auth/wrong-password' });
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+    const loginButtons = screen.getAllByRole('button', { name: /login/i });
+
+    fireEvent.change(emailInput, { target: { value: 'admin@gmail.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } });
+
+    fireEvent.click(loginButtons[0]);
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('Incorrect password.');
+    });
+  });
+
+  test('Test login failed with user not found', async () => {
+    window.alert = jest.fn();
+    signInWithEmailAndPassword.mockRejectedValue({ code: 'auth/user-not-found' });
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+    const loginButtons = screen.getAllByRole('button', { name: /login/i });
+
+    fireEvent.change(emailInput, { target: { value: 'nonexistent@gmail.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+
+    fireEvent.click(loginButtons[0]);
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('No account associated with this email.');
+    });
+  });
+
+  test('Test login failed with invalid email', async () => {
+    window.alert = jest.fn();
+    signInWithEmailAndPassword.mockRejectedValue({ code: 'auth/invalid-email' });
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+    const loginButtons = screen.getAllByRole('button', { name: /login/i });
+
+    fireEvent.change(emailInput, { target: { value: 'invalidemail' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+
+    fireEvent.click(loginButtons[0]);
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('Please enter a valid email address.');
+    });
+  });
+
+  test('Test login failed with unknown error', async () => {
+    window.alert = jest.fn();
+    signInWithEmailAndPassword.mockRejectedValue(new Error('Login failed'));
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+    const loginButtons = screen.getAllByRole('button', { name: /login/i });
+
+    fireEvent.change(emailInput, { target: { value: 'admin@gmail.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+
+    fireEvent.click(loginButtons[0]);
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('Login failed.');
+    });
+  });
+
+  test('Test login success', async () => {
+    signInWithEmailAndPassword.mockResolvedValue({ user: { email: 'admin@gmail.com' } });
+    const authorized_true = jest.fn();
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={authorized_true} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+    const loginButtons = screen.getAllByRole('button', { name: /login/i });
+
+    fireEvent.change(emailInput, { target: { value: 'admin@gmail.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+
+    fireEvent.click(loginButtons[0]);
+
+    await waitFor(() => {
+      expect(authorized_true).toHaveBeenCalled();
+    });
+  });
+
+  test('Test Google login success', async () => {
+    signInWithPopup.mockResolvedValue({
+      user: { uid: '123', email: 'admin@gmail.com', displayName: 'Admin' },
+    });
+    getDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ createdAt: new Date() }),
+    });
+    const authorized_true = jest.fn();
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={authorized_true} />
+      </MemoryRouter>
+    );
+
+    const googleLoginButtons = screen.getAllByRole('button', { name: /login with google/i });
+
+    fireEvent.click(googleLoginButtons[0]);
+
+    await waitFor(() => {
+      expect(setDoc).toHaveBeenCalled();
+      expect(authorized_true).toHaveBeenCalled();
+    });
+  });
+
+  test('Test Google login failed', async () => {
+    signInWithPopup.mockRejectedValue(new Error('Google login failed'));
+    window.alert = jest.fn();
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const googleLoginButtons = screen.getAllByRole('button', { name: /login with google/i });
+
+    fireEvent.click(googleLoginButtons[0]);
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('Google Login Failed');
+    });
+  });
+  test('Test Google login success', async () => {
+    signInWithPopup.mockResolvedValue({
+      user: { uid: '123', email: 'admin@gmail.com', displayName: 'Admin' },
+    });
+    getDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ createdAt: new Date() }),
+    });
+    const authorized_true = jest.fn();
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={authorized_true} />
+      </MemoryRouter>
+    );
+
+    const googleLoginButtons = screen.getAllByRole('button', { name: /login with google/i });
+
+    fireEvent.click(googleLoginButtons[0]);
+
+    await waitFor(() => {
+      expect(setDoc).toHaveBeenCalled();
+      expect(authorized_true).toHaveBeenCalled();
+    });
+  });
+
+  test('Test Google login failed', async () => {
+    signInWithPopup.mockRejectedValue(new Error('Google login failed'));
+    window.alert = jest.fn();
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const googleLoginButtons = screen.getAllByRole('button', { name: /login with google/i });
+
+    fireEvent.click(googleLoginButtons[0]);
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('Google Login Failed');
+    });
+  });
+  test('Test Google login success with new user', async () => {
+    signInWithPopup.mockResolvedValue({
+      user: { uid: '123', email: 'admin@gmail.com', displayName: 'Admin' },
+    });
+    getDoc.mockResolvedValue({
+      exists: () => false,
+    });
+    const authorized_true = jest.fn();
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={authorized_true} />
+      </MemoryRouter>
+    );
+
+    const googleLoginButtons = screen.getAllByRole('button', { name: /login with google/i });
+
+    fireEvent.click(googleLoginButtons[0]);
+
+    await waitFor(() => {
+      expect(setDoc).toHaveBeenCalled();
+      expect(authorized_true).toHaveBeenCalled();
+    });
+  });
+
+  test('Test Google login failed', async () => {
+    signInWithPopup.mockRejectedValue(new Error('Google login failed'));
+    window.alert = jest.fn();
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const googleLoginButtons = screen.getAllByRole('button', { name: /login with google/i });
+
+    fireEvent.click(googleLoginButtons[0]);
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('Google Login Failed');
+    });
+  });
+
+  test('Test signup button click', () => {
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const signupButton = screen.getByRole('button', { name: /click here/i });
+
+    fireEvent.click(signupButton);
+
+    // Add your assertions here based on what the signup button is supposed to do
+    // For example, if it navigates to a signup page, you can check the URL
+    // expect(window.location.pathname).toBe('/signup');
+  });
+  import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import Login from './login';
+import { MemoryRouter } from 'react-router-dom';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { db } from './firebase-config';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
+  signInWithPopup: jest.fn(),
+  GoogleAuthProvider: jest.fn(),
+}));
+
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(),
+  doc: jest.fn(),
+  setDoc: jest.fn(),
+  getDoc: jest.fn(),
+}));
+
+describe('Login Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('Confirm input fields are rendered', () => {
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    expect(emailInput).toBeInTheDocument();
+
+    const passwordInput = screen.getByPlaceholderText('Password');
+    expect(passwordInput).toBeInTheDocument();
+
+    const loginGoogle = screen.getByText('Login with Google');
+    expect(loginGoogle).toBeInTheDocument();
+  });
+
+  test('Test email/password input', () => {
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+
+    expect(emailInput.value).toBe('test@example.com');
+    expect(passwordInput.value).toBe('password123');
+  });
+
+  test('Test login failed with incorrect password', async () => {
+    window.alert = jest.fn();
+    signInWithEmailAndPassword.mockRejectedValue({ code: 'auth/wrong-password' });
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+    const loginButtons = screen.getAllByRole('button', { name: /login/i });
+
+    fireEvent.change(emailInput, { target: { value: 'admin@gmail.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } });
+
+    fireEvent.click(loginButtons[0]);
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('Incorrect password.');
+    });
+  });
+
+  test('Test login failed with user not found', async () => {
+    window.alert = jest.fn();
+    signInWithEmailAndPassword.mockRejectedValue({ code: 'auth/user-not-found' });
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+    const loginButtons = screen.getAllByRole('button', { name: /login/i });
+
+    fireEvent.change(emailInput, { target: { value: 'nonexistent@gmail.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+
+    fireEvent.click(loginButtons[0]);
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('No account associated with this email.');
+    });
+  });
+
+  test('Test login failed with invalid email', async () => {
+    window.alert = jest.fn();
+    signInWithEmailAndPassword.mockRejectedValue({ code: 'auth/invalid-email' });
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+    const loginButtons = screen.getAllByRole('button', { name: /login/i });
+
+    fireEvent.change(emailInput, { target: { value: 'invalidemail' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+
+    fireEvent.click(loginButtons[0]);
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('Please enter a valid email address.');
+    });
+  });
+
+  test('Test login failed with unknown error', async () => {
+    window.alert = jest.fn();
+    signInWithEmailAndPassword.mockRejectedValue(new Error('Login failed'));
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+    const loginButtons = screen.getAllByRole('button', { name: /login/i });
+
+    fireEvent.change(emailInput, { target: { value: 'admin@gmail.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+
+    fireEvent.click(loginButtons[0]);
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('Login failed.');
+    });
+  });
+
+  test('Test login success', async () => {
+    signInWithEmailAndPassword.mockResolvedValue({ user: { email: 'admin@gmail.com' } });
+    const authorized_true = jest.fn();
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={authorized_true} />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email');
+    const passwordInput = screen.getByPlaceholderText('Password');
+    const loginButtons = screen.getAllByRole('button', { name: /login/i });
+
+    fireEvent.change(emailInput, { target: { value: 'admin@gmail.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+
+    fireEvent.click(loginButtons[0]);
+
+    await waitFor(() => {
+      expect(authorized_true).toHaveBeenCalled();
+    });
+  });
+
+  test('Test Google login success with new user', async () => {
+    signInWithPopup.mockResolvedValue({
+      user: { uid: '123', email: 'admin@gmail.com', displayName: 'Admin' },
+    });
+    getDoc.mockResolvedValue({
+      exists: () => false,
+    });
+    const authorized_true = jest.fn();
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={authorized_true} />
+      </MemoryRouter>
+    );
+
+    const googleLoginButtons = screen.getAllByRole('button', { name: /login with google/i });
+
+    fireEvent.click(googleLoginButtons[0]);
+
+    await waitFor(() => {
+      expect(setDoc).toHaveBeenCalled();
+      expect(authorized_true).toHaveBeenCalled();
+    });
+  });
+
+  test('Test Google login failed', async () => {
+    signInWithPopup.mockRejectedValue(new Error('Google login failed'));
+    window.alert = jest.fn();
+
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const googleLoginButtons = screen.getAllByRole('button', { name: /login with google/i });
+
+    fireEvent.click(googleLoginButtons[0]);
+
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('Google Login Failed');
+    });
+  });
+
+  test('Test signup button click', () => {
+    render(
+      <MemoryRouter>
+        <Login authorized_true={() => {}} />
+      </MemoryRouter>
+    );
+
+    const signupButton = screen.getByRole('button', { name: /click here/i });
+
+    fireEvent.click(signupButton);
+
+    // Add your assertions here based on what the signup button is supposed to do
+    // For example, if it navigates to a signup page, you can check the URL
+    // expect(window.location.pathname).toBe('/signup');
+  });
+});
+});

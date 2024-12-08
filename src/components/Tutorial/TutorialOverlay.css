@@ -1,0 +1,54 @@
+/* src/components/Tutorial/TutorialOverlay.css */
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.tutorial-box {
+  background-color: #282c34;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.tutorial-box h2 {
+  color: #66AA11;
+  margin-top: 0;
+}
+
+.tutorial-navigation {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.tutorial-navigation button {
+  background-color: #66AA11;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tutorial-navigation button:hover:not(:disabled) {
+  background-color: #558800;
+}
+
+.tutorial-navigation button:disabled {
+  background-color: #444;
+  cursor: not-allowed;
+}
