@@ -2,15 +2,20 @@ import React from 'react';
 import Modal from './Modal';
 
 export const LogTransactionModal = ({ show, onClose, onSubmit, categories }) => {
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    onSubmit({
-      category: formData.get('category'),
-      memo: formData.get('memo'),
-      amount: parseFloat(formData.get('amount'))
-    }, 'log');
-    onClose();
+    try {
+      await onSubmit({
+        category: formData.get('category'),
+        memo: formData.get('memo'),
+        amount: parseFloat(formData.get('amount'))
+      }, 'log');
+      onClose();
+    } catch (error) {
+      console.error('Failed to log transaction:', error);
+      alert('Failed to update budget data');
+    }
   };
 
   return (
