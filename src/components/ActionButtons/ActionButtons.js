@@ -16,6 +16,9 @@ const ActionButtons = ({ onActionClick }) => {
       <div className="action-button" onClick={() => onActionClick('income')}>
         Change Income
       </div>
+      <div className="action-button" onClick={() => onActionClick('transactionHistory')}>
+        Transaction History
+      </div>
     </div>
   );
 };

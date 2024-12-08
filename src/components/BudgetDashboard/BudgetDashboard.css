@@ -58,25 +58,29 @@
     padding: 2rem;
   }
 
-  .back-button {
-    position: absolute;
-    top: -40px;
-    right: 0;
-    background-color: #66AA11;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s;
-  }
-  
-  .back-button:hover {
-    background-color: #558800;
-  }
-  
-  .pie-chart-container {
-    position: relative;
-    /* ... existing styles ... */
-  }  
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.back-button {
+  background-color: #66AA11;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  cursor: pointer;
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  transform: translateY(-10px);
+}
+
+.back-button:hover {
+  background-color: #558800;
+}

@@ -6,7 +6,6 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-
 import './BudgetDashboard.css';
 
 ChartJS.register(
@@ -21,6 +20,31 @@ const BudgetDashboard = ({ catData, catLabels, income, transactions }) => {
   const totalCategoryAmount = catData.reduce((a, b) => a + b, 0);
   const remainingAmount = Math.max(0, income - totalCategoryAmount);
 
+  // Helper function to get transactions from last 30 days
+  const getRecentTransactions = (category) => {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    return transactions.filter(t => {
+      const transactionDate = new Date(t.date);
+      return t.category === category && transactionDate >= thirtyDaysAgo;
+    });
+  };
+
+  // Calculate category-specific data
+  const getCategoryData = (category) => {
+    const categoryBudget = catData[catLabels.indexOf(category)];
+    const recentTransactions = getRecentTransactions(category);
+    const spentAmount = recentTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const remainingAmount = Math.max(0, categoryBudget - spentAmount);
+
+    return {
+      budget: categoryBudget,
+      spent: spentAmount,
+      remaining: remainingAmount,
+      transactionCount: recentTransactions.length
+    };
+  };
 
   // Define bright colors for categories
   const categoryColors = [
@@ -36,50 +60,40 @@ const BudgetDashboard = ({ catData, catLabels, income, transactions }) => {
     '#45B7D1', // Sky blue
   ];
 
-  const getMainPieData = () => ({
+
+  const pieData = selectedCategory ? {
+    labels: ['Spent', 'Remaining'],
+    datasets: [{
+      data: [
+        getCategoryData(selectedCategory).spent,
+        getCategoryData(selectedCategory).remaining
+      ],
+      backgroundColor: [categoryColors[catLabels.indexOf(selectedCategory)], '#E0E0E0'],
+      hoverBackgroundColor: [
+        categoryColors[catLabels.indexOf(selectedCategory)].replace('FF', 'DD'),
+        '#CCCCCC'
+      ]
+    }]
+  } : {
     labels: [...catLabels, 'Remaining'],
     datasets: [{
       data: [...catData, remainingAmount],
       backgroundColor: [
         ...catLabels.map((_, index) => categoryColors[index % categoryColors.length]),
-        '#E0E0E0'  // Light gray for remaining amount
+
+        '#E0E0E0'
+
       ],
       hoverBackgroundColor: [
         ...catLabels.map((_, index) => {
           const color = categoryColors[index % categoryColors.length];
           return color.replace('FF', 'DD');
         }),
-        '#CCCCCC'  // Slightly darker gray for remaining amount hover
+        
+        '#CCCCCC'
       ],
-    }],
-  });
-
-  const getTransactionPieData = () => {
-    const categoryTransactions = transactions.filter(t => t.category === selectedCategory);
-    const categoryIndex = catLabels.indexOf(selectedCategory);
-    const categoryBudget = catData[categoryIndex];
-    const totalSpent = categoryTransactions.reduce((sum, t) => sum + t.amount, 0);
-    const remainingInCategory = Math.max(0, categoryBudget - totalSpent);
-
-    return {
-      labels: [...categoryTransactions.map(t => t.memo || 'No memo'), 'Remaining'],
-      datasets: [{
-        data: [...categoryTransactions.map(t => t.amount), remainingInCategory],
-        backgroundColor: [
-          ...categoryTransactions.map((_, index) => 
-            categoryColors[index % categoryColors.length]
-          ),
-          '#E0E0E0'  // Same light gray for remaining amount
-        ],
-        hoverBackgroundColor: [
-          ...categoryTransactions.map((_, index) => {
-            const color = categoryColors[index % categoryColors.length];
-            return color.replace('FF', 'DD');
-          }),
-          '#CCCCCC'  // Same hover gray as main chart
-        ],
-      }],
-    };
+    }]
+    
   };
 
   const mainOptions = {
@@ -89,9 +103,7 @@ const BudgetDashboard = ({ catData, catLabels, income, transactions }) => {
         labels: {
           color: 'white',
           padding: 20,
-          font: {
-            size: 14
-          }
+          font: { size: 14 }
         }
       },
       tooltip: {
@@ -104,61 +116,71 @@ const BudgetDashboard = ({ catData, catLabels, income, transactions }) => {
         }
       }
     },
-    maintainAspectRatio: true,
-    responsive: true,
     onClick: (event, elements) => {
-      if (elements.length > 0) {
+      if (elements.length > 0 && !selectedCategory) {
         const index = elements[0].index;
         if (index < catLabels.length) { // Don't select "Remaining" slice
           setSelectedCategory(catLabels[index]);
         }
       }
-    }
-  };
+    },
+    maintainAspectRatio: true,
+    responsive: true,
 
-  const transactionOptions = {
-    ...mainOptions,
-    onClick: undefined, // Remove click handler for transaction view
-    plugins: {
-      ...mainOptions.plugins,
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            const label = context.label || '';
-            const value = context.raw || 0;
-            if (label === 'Remaining') {
-              return `Remaining: $${value.toFixed(2)}`;
-            }
-            const date = transactions.find(t => t.memo === label)?.date;
-            return [
-              `${label}`,
-              `Amount: $${value.toFixed(2)}`,
-              date ? `Date: ${new Date(date).toLocaleDateString()}` : '',
-            ].filter(Boolean);
-          }
-        }
-      }
-    }
-  };
+    elements: {
+      arc: {
+        cursor: (ctx) => {
+          const index = ctx.dataIndex;
+          return (!selectedCategory && index < catLabels.length) ? 'pointer' : 'default';
 
   return (
     <div className="dashboard">
-      <h2>Budget Overview</h2>
+      <div className="dashboard-header">
+        {selectedCategory && (
+          <button 
+            className="back-button" 
+            onClick={() => setSelectedCategory(null)}
+          >
+            ←
+          </button>
+        )}
+        <h2>{selectedCategory ? `${selectedCategory} Overview` : 'Budget Overview'}</h2>
+      </div>
+
       <div className="budget-summary">
         <div className="summary-item">
           <label>Total Income:</label>
           <span>${income.toFixed(2)}</span>
         </div>
-        <div className="summary-item">
-          <label>Total Budgeted:</label>
-          <span>${totalCategoryAmount.toFixed(2)}</span>
-        </div>
-        <div className="summary-item">
-          <label>Remaining:</label>
-          <span>${remainingAmount.toFixed(2)}</span>
-        </div>
+        {selectedCategory ? (
+          <>
+            <div className="summary-item">
+              <label>Budget for {selectedCategory}:</label>
+              <span>${getCategoryData(selectedCategory).budget.toFixed(2)}</span>
+            </div>
+            <div className="summary-item">
+              <label>Remaining for {selectedCategory}:</label>
+              <span>${getCategoryData(selectedCategory).remaining.toFixed(2)}</span>
+            </div>
+            <div className="summary-item">
+              <label>Transactions (30 days):</label>
+              <span>{getCategoryData(selectedCategory).transactionCount}</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="summary-item">
+              <label>Total Budgeted:</label>
+              <span>${totalCategoryAmount.toFixed(2)}</span>
+            </div>
+            <div className="summary-item">
+              <label>Remaining:</label>
+              <span>${remainingAmount.toFixed(2)}</span>
+            </div>
+          </>
+        )}
       </div>
-      
+
       <div className="pie-chart-container">
         {selectedCategory && (
           <button 
