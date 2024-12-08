@@ -28,9 +28,9 @@ describe('BudgetDashboard', () => {
     catLabels: ['Food', 'Rent', 'Entertainment'],
     income: 1000,
     transactions: [
-      { id: 1, category: 'Food', amount: 50, memo: 'Groceries', date: '2024-03-20' },
-      { id: 2, category: 'Food', amount: 30, memo: 'Restaurant', date: '2024-03-21' },
-      { id: 3, category: 'Rent', amount: 200, memo: 'March Rent', date: '2024-03-01' },
+      { id: 1, category: 'Food', amount: 50, memo: 'Groceries', date: new Date().toISOString().split('T')[0] },
+      { id: 2, category: 'Food', amount: 30, memo: 'Restaurant', date: new Date().toISOString().split('T')[0]},
+      { id: 3, category: 'Rent', amount: 200, memo: 'March Rent', date: new Date().toISOString().split('T')[0]},
     ]
   };
 
@@ -99,7 +99,7 @@ describe('BudgetDashboard', () => {
       
       // Wait for state update and check for back button
       await waitFor(() => {
-        const backButton = screen.getByRole('button', { name: /back to overview/i });
+        const backButton = screen.getByRole('button', { name:  /←/i });
         expect(backButton).toBeInTheDocument();
       });
     });  
@@ -173,7 +173,7 @@ describe('BudgetDashboard', () => {
       
       // Wait for the transaction view to appear
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /back to overview/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name:  /←/i })).toBeInTheDocument();
       });
       
       // Get the chart data after switching to transaction view
@@ -188,7 +188,7 @@ describe('BudgetDashboard', () => {
       
       // Verify the transaction data
       expect(chartData).toEqual([
-        ...foodTransactions.map(t => t.amount),
+        totalSpent,
         expectedRemaining
       ]);
     });
@@ -218,7 +218,7 @@ describe('BudgetDashboard', () => {
       fireEvent.click(pieChart);
       
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /back to overview/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name:  /←/i })).toBeInTheDocument();
       });
       
       const transactionPieChart = screen.getByTestId('mock-pie-chart');
@@ -232,8 +232,8 @@ describe('BudgetDashboard', () => {
       const expectedRemaining = mockProps.catData[0] - totalSpent; // Food budget - spent
       
       // Verify transaction view data structure
-      expect(chartLabels).toEqual(expectedLabels);
-      expect(chartData).toEqual([...foodTransactions.map(t => t.amount), expectedRemaining]);
+      expect(chartLabels).toEqual(['Spent', 'Remaining']);
+      expect(chartData).toEqual([totalSpent, expectedRemaining]);
     });
   
     test('assigns correct colors to chart segments', () => {

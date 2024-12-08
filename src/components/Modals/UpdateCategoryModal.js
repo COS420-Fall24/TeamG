@@ -7,7 +7,7 @@ export const UpdateCategoryModal = ({ show, onClose, onSubmit, categories }) => 
     const formData = new FormData(e.target);
     onSubmit({
       oldCategory: formData.get('oldCategory'),
-      newCategory: formData.get('newCategory'),
+      name: formData.get('newCategory'),
       amount: parseFloat(formData.get('amount'))
     }, 'update');
     onClose();
@@ -30,8 +30,9 @@ export const UpdateCategoryModal = ({ show, onClose, onSubmit, categories }) => 
           <label>New Category Name:</label>
           <input 
             type="text" 
-            name="newCategory" 
-            placeholder="Enter new name (leave blank to keep current)"
+            name="newCategory"
+            placeholder="Enter new name"
+            required
           />
         </div>
         <div>

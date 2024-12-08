@@ -10,24 +10,39 @@ export const useBudgetData = (userId) => {
 
   const fetchData = async () => {
     if (userId) {
-      const userDocRef = doc(db, 'users', userId);
-      const userDoc = await getDoc(userDocRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const budgetData = userData.budgetData || [];
-        const transactions = userData.transactions || [];
-        
-        // Set income
-        const incomeEntry = budgetData.find(entry => entry.category === 'Income');
-        setIncome(incomeEntry ? incomeEntry.amount : 0);
+      try {
+        const userDocRef = doc(db, 'users', userId);
+        const userDoc = await getDoc(userDocRef);
 
-        // Set categories and amounts
-        const categories = budgetData.filter(entry => entry.type === 'category');
-        setCatData(categories.map(entry => entry.amount));
-        setCatLabels(categories.map(entry => entry.category));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const budgetData = userData.budgetData || [];
 
-        // Set transactions
-        setTransactions(transactions);
+          // Set income
+          const incomeEntry = budgetData.find(entry => entry.category === 'Income');
+          setIncome(incomeEntry ? incomeEntry.amount : 0);
+
+          // Set categories and amounts
+          const categories = budgetData
+            .filter(entry => entry.type === 'category')
+            .map(entry => entry.category);
+          const amounts = budgetData
+            .filter(entry => entry.type === 'category')
+            .map(entry => entry.amount);
+
+          setCatData(amounts);
+          setCatLabels(categories);
+
+          // Set transactions
+          const allTransactions = budgetData
+            .filter(entry => entry.type === 'category')
+            .flatMap(entry => entry.transactions || [])
+            .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+          
+          setTransactions(allTransactions);
+        }
+      } catch (error) {
+        console.error('Error fetching budget data:', error);
       }
     }
   };
@@ -39,82 +54,89 @@ export const useBudgetData = (userId) => {
   const handleFormSubmit = async (formData, type) => {
     if (!userId) return;
 
-    const userDocRef = doc(db, 'users', userId);
-    const userDoc = await getDoc(userDocRef);
-    let budgetData = userDoc.exists() ? userDoc.data().budgetData || [] : [];
-    let transactions = userDoc.exists() ? userDoc.data().transactions || [] : [];
-
     try {
+      const userDocRef = doc(db, 'users', userId);
+      const userDoc = await getDoc(userDocRef);
+      const currentData = userDoc.exists() ? userDoc.data().budgetData || [] : [];
+      let updatedData;
+
       switch (type) {
-        case 'new':
-          // Add new category
-          budgetData.push({
+        case 'log':
+          const newTransaction = {
             category: formData.category,
-            amount: formData.amount,
-            type: 'category'
+            memo: formData.memo,
+            amount: parseFloat(formData.amount),
+            date: new Date().toLocaleDateString(),
+            time: new Date().toLocaleTimeString(),
+            type: 'transaction'
+          };
+
+          updatedData = currentData.map(entry => {
+            if (entry.category === formData.category && entry.type === 'category') {
+              return {
+                ...entry,
+                transactions: [newTransaction, ...(entry.transactions || [])]
+              };
+            }
+            return entry;
           });
+
+          await updateDoc(userDocRef, { budgetData: updatedData });
+          setTransactions(prevTransactions => [newTransaction, ...prevTransactions]);
+          break;
+
+        case 'new':
+          const newCategory = {
+            category: formData.name,
+            amount: parseFloat(formData.amount),
+            type: 'category',
+            transactions: []
+          };
+          updatedData = [...currentData, newCategory];
+          await updateDoc(userDocRef, { budgetData: updatedData });
+          await fetchData();
           break;
 
         case 'update':
-          // Update existing category
-          const categoryIndex = budgetData.findIndex(
-            item => item.category === formData.oldCategory
-          );
-          if (categoryIndex !== -1) {
-            budgetData[categoryIndex] = {
-              category: formData.newCategory || formData.oldCategory,
-              amount: formData.amount,
-              type: 'category'
-            };
-            // Update category name in transactions if it changed
-            if (formData.newCategory && formData.newCategory !== formData.oldCategory) {
-              transactions = transactions.map(t => ({
-                ...t,
-                category: t.category === formData.oldCategory ? formData.newCategory : t.category
-              }));
+          updatedData = currentData.map(entry => {
+            if (entry.category === formData.oldCategory) {
+              // Update category entry with new name and amount
+              return {
+                ...entry,
+                category: formData.name,
+                amount: parseFloat(formData.amount),
+                // Update category name in all transactions
+                transactions: (entry.transactions || []).map(t => ({
+                  ...t,
+                  category: formData.name
+                }))
+              };
             }
-          }
+            return entry;
+          });
+          await updateDoc(userDocRef, { budgetData: updatedData });
+          await fetchData();
           break;
 
         case 'income':
-          // Update income
-          const incomeIndex = budgetData.findIndex(
-            item => item.category === 'Income'
-          );
-          if (incomeIndex !== -1) {
-            budgetData[incomeIndex].amount = formData.amount;
-          } else {
-            budgetData.push({
-              category: 'Income',
-              amount: formData.amount,
-              type: 'income'
-            });
-          }
-          break;
-
-        case 'log':
-          // Log a transaction without changing category amount
-          transactions.push({
-            category: formData.category,
+          const incomeEntry = {
+            category: 'Income',
             amount: formData.amount,
-            memo: formData.memo,
-            date: new Date().toISOString()
-          });
+            type: 'income'
+          };
+          updatedData = currentData.filter(entry => entry.category !== 'Income');
+          updatedData.push(incomeEntry);
+          await updateDoc(userDocRef, { budgetData: updatedData });
+          setIncome(formData.amount);
           break;
+
+        default:
+          return;
       }
-
-      // Update Firestore
-      await updateDoc(userDocRef, { 
-        budgetData,
-        transactions 
-      });
-
-      // Refresh the local state
-      await fetchData();
 
     } catch (error) {
       console.error('Error updating budget data:', error);
-      alert('Failed to update budget data');
+      throw error;
     }
   };
 
@@ -123,10 +145,8 @@ export const useBudgetData = (userId) => {
       try {
         const userDocRef = doc(db, 'users', userId);
         await updateDoc(userDocRef, {
-          budgetData: [{ category: 'Income', amount: 0, type: 'income' }],
-          transactions: []
+          budgetData: [{ category: 'Income', amount: 0, type: 'income' }]
         });
-        // Reset local state
         setCatData([]);
         setCatLabels([]);
         setIncome(0);
