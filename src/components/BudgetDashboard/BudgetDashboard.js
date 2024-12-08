@@ -36,7 +36,7 @@ const BudgetDashboard = ({ catData, catLabels, income, transactions }) => {
     const categoryBudget = catData[catLabels.indexOf(category)];
     const recentTransactions = getRecentTransactions(category);
     const spentAmount = recentTransactions.reduce((sum, t) => sum + t.amount, 0);
-    const remainingAmount = Math.max(0, categoryBudget - spentAmount);
+    const remainingAmount = categoryBudget - spentAmount;
 
     return {
       budget: categoryBudget,
@@ -114,7 +114,7 @@ const BudgetDashboard = ({ catData, catLabels, income, transactions }) => {
     onClick: (event, elements) => {
       if (elements.length > 0 && !selectedCategory) {
         const index = elements[0].index;
-        if (index < catLabels.length) { // Don't select "Remaining" slice
+        if (index < catLabels.length) {
           setSelectedCategory(catLabels[index]);
         }
       }
@@ -146,10 +146,12 @@ const BudgetDashboard = ({ catData, catLabels, income, transactions }) => {
       </div>
 
       <div className="budget-summary">
-        <div className="summary-item">
-          <label>Total Income:</label>
-          <span>${income.toFixed(2)}</span>
-        </div>
+        {!selectedCategory && (
+          <div className="summary-item">
+            <label>Total Income:</label>
+            <span>${income.toFixed(2)}</span>
+          </div>
+        )}
         {selectedCategory ? (
           <>
             <div className="summary-item">
@@ -157,8 +159,14 @@ const BudgetDashboard = ({ catData, catLabels, income, transactions }) => {
               <span>${getCategoryData(selectedCategory).budget.toFixed(2)}</span>
             </div>
             <div className="summary-item">
+              <label>Spent on {selectedCategory}:</label>
+              <span>${getCategoryData(selectedCategory).spent.toFixed(2)}</span>
+            </div>
+            <div className="summary-item">
               <label>Remaining for {selectedCategory}:</label>
-              <span>${getCategoryData(selectedCategory).remaining.toFixed(2)}</span>
+              <span className={getCategoryData(selectedCategory).remaining < 0 ? 'negative-amount' : ''}>
+                ${getCategoryData(selectedCategory).remaining.toFixed(2)}
+              </span>
             </div>
             <div className="summary-item">
               <label>Transactions (30 days):</label>

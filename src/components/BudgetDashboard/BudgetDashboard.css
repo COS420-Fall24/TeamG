@@ -84,3 +84,7 @@
 .back-button:hover {
   background-color: #558800;
 }
+
+.negative-amount {
+  color: #ff4444;
+}

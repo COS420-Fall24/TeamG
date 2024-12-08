@@ -1,5 +1,5 @@
 // src/components/Tutorial/TutorialOverlay.js
-import React from 'react';
+import React, { useState} from 'react';
 import './TutorialOverlay.css';
 
 const tutorialSteps = [
@@ -17,22 +17,35 @@ const tutorialSteps = [
   },
 ];
 
-const TutorialOverlay = ({ currentStep, onAction }) => {
+const TutorialOverlay = ({ onAction }) => {
+  const [step, setStep] = useState(0);
+
+  // Add handlers to manage state
+  const handleNext = () => {
+    setStep(prev => prev + 1);
+    if (onAction?.next) onAction.next();
+  };
+
+  const handlePrev = () => {
+    setStep(prev => prev - 1);
+    if (onAction?.prev) onAction.prev();
+  };
+
   return (
     <div className="tutorial-overlay">
       <div className="tutorial-box">
-        <h2>{tutorialSteps[currentStep].title}</h2>
-        <p>{tutorialSteps[currentStep].content}</p>
+        <h2>{tutorialSteps[step].title}</h2>
+        <p>{tutorialSteps[step].content}</p>
         <div className="tutorial-navigation">
           <button 
-            onClick={onAction.prev} 
-            disabled={currentStep === 0}
+            onClick={handlePrev} 
+            disabled={step === 0}
           >
             Previous
           </button>
           <button 
-            onClick={onAction.next} 
-            disabled={currentStep === tutorialSteps.length - 1}
+            onClick={handleNext} 
+            disabled={step === tutorialSteps.length - 1}
           >
             Next
           </button>
