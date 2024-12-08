@@ -17,12 +17,23 @@ export const NewCategoryModal = ({ show, onClose, onSubmit }) => {
       <h2>New Category</h2>
       <form onSubmit={handleSubmit} className="modal-form">
         <div>
-          <label>Category Name:</label>
-          <input type="text" name="category" required />
+          <label htmlFor="categoryName">Category Name:</label>
+          <input 
+            id="categoryName"
+            type="text" 
+            name="category" 
+            required 
+          />
         </div>
         <div>
-          <label>Budget Amount:</label>
-          <input type="number" name="amount" step="0.01" required />
+          <label htmlFor="budgetAmount">Budget Amount:</label>
+          <input 
+            id="budgetAmount"
+            type="number" 
+            name="amount" 
+            step="0.01" 
+            required 
+          />
         </div>
         <button type="submit">Create Category</button>
       </form>
