@@ -57,3 +57,26 @@
     font-style: italic;
     padding: 2rem;
   }
+
+  .back-button {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background-color: #66AA11;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+  }
+  
+  .back-button:hover {
+    background-color: #558800;
+  }
+  
+  .pie-chart-container {
+    position: relative;
+    /* ... existing styles ... */
+  }  

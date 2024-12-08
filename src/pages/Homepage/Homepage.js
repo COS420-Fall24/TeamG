@@ -20,6 +20,7 @@ import './Homepage.css';
 const Homepage = () => {
   const [activeModal, setActiveModal] = useState(null);
   const { user, handleLogout, handleDeleteAccount } = useAuth();
+
   const { 
     catData, 
     catLabels, 
@@ -29,6 +30,8 @@ const Homepage = () => {
     handleClearData 
   } = useBudgetData(user?.uid);
   const { tutorial, currentStep, handleTutorialActions } = useTutorial(user?.uid);
+  const { catData, catLabels, income, transactions, handleFormSubmit, handleClearData } = useBudgetData(user?.uid);
+
 
   return (
     <div className="homepage-container">
@@ -46,6 +49,7 @@ const Homepage = () => {
           catData={catData}
           catLabels={catLabels}
           income={income}
+          transactions={transactions}
         />
         <ActionButtons onActionClick={setActiveModal} />
       </div>
