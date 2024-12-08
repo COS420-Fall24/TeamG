@@ -67,3 +67,45 @@
     .modal-form button:hover {
       background-color: #558800;
     }
+
+/* Transaction History Table Styles */
+.transaction-table-container {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 1rem;
+}
+
+.transaction-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #1a1d23;
+  color: white;
+}
+
+.transaction-table th,
+.transaction-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #444;
+}
+
+.transaction-table th {
+  background-color: #66AA11;
+  color: white;
+  position: sticky;
+  top: 0;
+}
+
+.transaction-table tr:nth-child(even) {
+  background-color: #282c34;
+}
+
+.transaction-table tr:hover {
+  background-color: #333842;
+}
+
+.no-transactions {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+}

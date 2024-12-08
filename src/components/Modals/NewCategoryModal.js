@@ -6,7 +6,7 @@ export const NewCategoryModal = ({ show, onClose, onSubmit }) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     onSubmit({
-      category: formData.get('category'),
+      name: formData.get('category'),
       amount: parseFloat(formData.get('amount'))
     }, 'new');
     onClose();
