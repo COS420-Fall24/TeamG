@@ -46,6 +46,7 @@ const Homepage = () => {
           catData={catData}
           catLabels={catLabels}
           income={income}
+          transactions={transactions}
         />
         <ActionButtons onActionClick={setActiveModal} />
       </div>
