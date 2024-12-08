@@ -88,7 +88,7 @@ export const useBudgetData = (userId) => {
         case 'new':
           const newCategory = {
             category: formData.name,
-            amount: formData.amount,
+            amount: parseFloat(formData.amount),
             type: 'category',
             transactions: []
           };
@@ -98,11 +98,22 @@ export const useBudgetData = (userId) => {
           break;
 
         case 'update':
-          updatedData = currentData.map(entry =>
-            entry.category === formData.oldCategory
-              ? { ...entry, category: formData.name, amount: formData.amount }
-              : entry
-          );
+          updatedData = currentData.map(entry => {
+            if (entry.category === formData.oldCategory) {
+              // Update category entry with new name and amount
+              return {
+                ...entry,
+                category: formData.name,
+                amount: parseFloat(formData.amount),
+                // Update category name in all transactions
+                transactions: (entry.transactions || []).map(t => ({
+                  ...t,
+                  category: formData.name
+                }))
+              };
+            }
+            return entry;
+          });
           await updateDoc(userDocRef, { budgetData: updatedData });
           await fetchData();
           break;
