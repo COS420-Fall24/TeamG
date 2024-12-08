@@ -21,6 +21,7 @@ const BudgetDashboard = ({ catData, catLabels, income, transactions }) => {
   const totalCategoryAmount = catData.reduce((a, b) => a + b, 0);
   const remainingAmount = Math.max(0, income - totalCategoryAmount);
 
+
   // Define bright colors for categories
   const categoryColors = [
     '#FF6384',  // Bright pink
