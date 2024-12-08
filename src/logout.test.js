@@ -1,6 +1,5 @@
-/*
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import Homepage from './homepage';
+import Homepage from './pages/Homepage';
 import { MemoryRouter } from 'react-router-dom';
 
 describe('Logout Tests', () => {
@@ -33,4 +32,3 @@ describe('Logout Tests', () => {
     });
 
 });
-*/

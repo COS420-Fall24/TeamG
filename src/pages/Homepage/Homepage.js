@@ -20,6 +20,7 @@ import './Homepage.css';
 const Homepage = () => {
   const [activeModal, setActiveModal] = useState(null);
   const { user, handleLogout, handleDeleteAccount } = useAuth();
+
   const { 
     catData, 
     catLabels, 

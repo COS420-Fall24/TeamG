@@ -60,6 +60,7 @@ const BudgetDashboard = ({ catData, catLabels, income, transactions }) => {
     '#45B7D1', // Sky blue
   ];
 
+
   const pieData = selectedCategory ? {
     labels: ['Spent', 'Remaining'],
     datasets: [{
@@ -79,19 +80,23 @@ const BudgetDashboard = ({ catData, catLabels, income, transactions }) => {
       data: [...catData, remainingAmount],
       backgroundColor: [
         ...catLabels.map((_, index) => categoryColors[index % categoryColors.length]),
+
         '#E0E0E0'
+
       ],
       hoverBackgroundColor: [
         ...catLabels.map((_, index) => {
           const color = categoryColors[index % categoryColors.length];
           return color.replace('FF', 'DD');
         }),
+        
         '#CCCCCC'
       ],
     }]
+    
   };
 
-  const options = {
+  const mainOptions = {
     plugins: {
       legend: {
         position: 'bottom',
@@ -121,15 +126,12 @@ const BudgetDashboard = ({ catData, catLabels, income, transactions }) => {
     },
     maintainAspectRatio: true,
     responsive: true,
+
     elements: {
       arc: {
         cursor: (ctx) => {
           const index = ctx.dataIndex;
           return (!selectedCategory && index < catLabels.length) ? 'pointer' : 'default';
-        }
-      }
-    }
-  };
 
   return (
     <div className="dashboard">
@@ -180,8 +182,27 @@ const BudgetDashboard = ({ catData, catLabels, income, transactions }) => {
       </div>
 
       <div className="pie-chart-container">
+        {selectedCategory && (
+          <button 
+            className="back-button"
+            onClick={() => setSelectedCategory(null)}
+          >
+            ← Back to Overview
+          </button>
+        )}
+        
         {catData.length > 0 ? (
-          <Pie data={pieData} options={options} />
+          selectedCategory ? (
+            <Pie 
+              data={getTransactionPieData()} 
+              options={transactionOptions} 
+            />
+          ) : (
+            <Pie 
+              data={getMainPieData()} 
+              options={mainOptions} 
+            />
+          )
         ) : (
           <p className="no-data">No categories added yet. Click "New Category" to get started!</p>
         )}
