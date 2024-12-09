@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './login.css';
 import { GoogleAuthProvider, signInWithPopup, getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { db } from "./firebase-config"; // Import Firestore instance
-import { doc, setDoc } from "firebase/firestore"; // Firestore functions
+import { doc, setDoc, getDoc } from "firebase/firestore"; // Firestore functions
 
 const Login = ({ authorized_true }) => {
   const [email, setEmail] = useState('');
@@ -45,24 +45,41 @@ const handleLogin = async () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      // Store user info in Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        email: user.email,
-        name: user.displayName,
-        createdAt: new Date(),
-      });
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+      
+      if (userDoc.exists()) {
+        console.log("User document exists, updating...");
+        await setDoc(
+          userRef,
+          {
+            email: user.email,
+            name: user.displayName,
+            createdAt: userDoc.data().createdAt || new Date(),
+          },
+          { merge: true }
+        );
+      } else {
+        console.log("User document does not exist, creating new document...");
+        await setDoc(userRef, {
+          email: user.email,
+          name: user.displayName,
+          createdAt: new Date(),
+        });
+      }
 
       console.log('Google login successful:', user);
       authorized_true(true);
       navigate('/homepage');
     } catch (error) {
-      handleGoogleFailure(); // Call the failure handler
+      console.error('Google login error:', error.message);
+      handleGoogleFailure(error); // Call the failure handler
     }
   };
 
   // Handle Google login failure
-  const handleGoogleFailure = () => {
-    console.log('Google login failed');
+  const handleGoogleFailure = (error = { message: 'Unknown error' }) => {
+    console.error('Google login failed:', error.message);
     alert('Google Login Failed');
   };
 

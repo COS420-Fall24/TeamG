@@ -1,0 +1,58 @@
+.homepage-container {
+    min-height: 100vh;
+    background-color: #282c34;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .content {
+    padding: 20px;
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+  
+  h1 {
+    margin: 0;
+    padding: 20px 0;
+  }
+  
+  .dashboard {
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #1a1d23;
+    border-radius: 8px;
+  }
+  
+  .pie-chart-container {
+    max-width: 400px;
+    margin: 20px auto;
+  }
+  
+  .actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  
+  .action-button {
+    background-color: #66AA11;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .action-button:hover {
+    background-color: #558800;
+  }
