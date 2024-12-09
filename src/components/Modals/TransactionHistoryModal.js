@@ -6,7 +6,14 @@ export const TransactionHistoryModal = ({ show, onClose, transactions }) => {
   return (
     <Modal show={show} onClose={onClose}>
       <h2>Transaction History</h2>
-      <div className="transaction-table-container">
+      <div 
+        className="transaction-table-container" 
+        data-testid="transaction-table-container"
+        style={{ 
+          maxHeight: '400px',
+          overflowY: 'auto'
+        }}
+      >
         {transactions && transactions.length > 0 ? (
           <table className="transaction-table">
             <thead>
